@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sim Development Tools</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sim Development Tools</h1>
+            <nav>
+                <button id="editor-tab" class="tab-button active">Tileset Editor</button>
+                <button id="client-tab" class="tab-button">Client View</button>
+            </nav>
+        </header>
+
+        <!-- Tileset Editor -->
+        <div id="editor-view" class="view active">
+            <div class="editor-container">
+                <div class="editor-sidebar">
+                    <h2>Tileset Editor</h2>
+                    <div class="tool-section">
+                        <label for="tileset-select">Select Tileset:</label>
+                        <select id="tileset-select">
+                            <option value="terrain">Terrain Tiles</option>
+                            <option value="furniture">Furniture & Items</option>
+                            <option value="interior">Interior Tiles</option>
+                            <option value="character">Character Sprites</option>
+                        </select>
+                    </div>
+                    <div class="tool-section">
+                        <label for="tileset-upload">Load Tileset Image (Override):</label>
+                        <input type="file" id="tileset-upload" accept="image/*">
+                        <p style="font-size: 0.75rem; color: #888; margin-top: 0.25rem;">
+                            Tilesets auto-load from resources folder on page load
+                        </p>
+                    </div>
+                    <div class="tool-section">
+                        <label>Tile Size:</label>
+                        <input type="number" id="tile-width" value="32" min="8" max="128">
+                        <span>x</span>
+                        <input type="number" id="tile-height" value="32" min="8" max="128">
+                    </div>
+                    <div class="tool-section">
+                        <label>Grid Size:</label>
+                        <input type="number" id="grid-cols" value="4" min="1" max="20">
+                        <span>x</span>
+                        <input type="number" id="grid-rows" value="4" min="1" max="20">
+                    </div>
+                    <div class="tool-section">
+                        <button id="apply-settings">Apply Settings</button>
+                        <button id="export-tileset">Export Tileset JSON</button>
+                    </div>
+                    <div class="tool-section">
+                        <h3>Selected Tile Info</h3>
+                        <div id="tile-info">
+                            <p>No tile selected</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="editor-main">
+                    <canvas id="tileset-canvas"></canvas>
+                    <div class="editor-controls">
+                        <button id="clear-selection">Clear Selection</button>
+                        <button id="save-tile">Save Tile Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client View -->
+        <div id="client-view" class="view">
+            <div class="client-container">
+                <div class="client-sidebar">
+                    <h2>Map Editor</h2>
+                    <div class="tool-section help-section">
+                        <h3>Edit Mode Controls</h3>
+                        <p><strong>Left Click:</strong> Place selected tile</p>
+                        <p><strong>Right Click:</strong> Remove tile</p>
+                        <p><strong>Drag:</strong> Pan viewport</p>
+                        <p><strong>Wheel:</strong> Zoom in/out</p>
+                        <h3 style="margin-top: 0.75rem;">Play Mode Controls</h3>
+                        <p><strong>WASD / Arrow Keys:</strong> Move character</p>
+                        <p><strong>Camera:</strong> Follows player automatically</p>
+                    </div>
+                    <div class="tool-section">
+                        <label>Map Size:</label>
+                        <input type="number" id="map-width" value="20" min="5" max="100">
+                        <span>x</span>
+                        <input type="number" id="map-height" value="20" min="5" max="100">
+                    </div>
+                    <div class="tool-section">
+                        <button id="create-map">Create New Map</button>
+                        <button id="load-map">Load Map</button>
+                        <button id="save-map">Save Map</button>
+                    </div>
+                    <div class="tool-section">
+                        <h3>Character</h3>
+                        <button id="spawn-player">Spawn Player</button>
+                        <button id="toggle-game-mode">Enter Play Mode</button>
+                        <p id="game-mode-status" style="margin-top: 0.5rem; color: #b0b0b0; font-size: 0.85rem;">Edit Mode</p>
+                    </div>
+                    <div class="tool-section">
+                        <h3>Entities</h3>
+                        <label>Entity Type:</label>
+                        <select id="entity-type-select" style="width: 100%; margin-bottom: 0.5rem;">
+                            <option value="npc">NPC (Sim)</option>
+                            <option value="item">Functional Item</option>
+                        </select>
+                        <div id="item-def-container" style="display: none; margin-bottom: 0.5rem;">
+                            <label>Item Type:</label>
+                            <select id="item-def-select" style="width: 100%; margin-bottom: 0.5rem;">
+                                <optgroup label="Food">
+                                    <option value="apple">Apple</option>
+                                    <option value="meal">Meal</option>
+                                    <option value="sandwich">Sandwich</option>
+                                    <option value="pizza">Pizza</option>
+                                </optgroup>
+                                <optgroup label="Drinks">
+                                    <option value="water">Water</option>
+                                    <option value="juice">Juice</option>
+                                    <option value="coffee">Coffee</option>
+                                    <option value="soda">Soda</option>
+                                </optgroup>
+                                <optgroup label="Furniture">
+                                    <option value="bed">Bed</option>
+                                    <option value="couch">Couch</option>
+                                    <option value="chair">Chair</option>
+                                    <option value="table">Table</option>
+                                    <option value="desk">Desk</option>
+                                </optgroup>
+                                <optgroup label="Entertainment">
+                                    <option value="tv">TV</option>
+                                    <option value="book">Book</option>
+                                    <option value="computer">Computer</option>
+                                    <option value="game">Game Console</option>
+                                </optgroup>
+                            </select>
+                            <label>Custom Sprite (Optional):</label>
+                            <div style="display: flex; gap: 0.25rem; margin-bottom: 0.25rem;">
+                                <select id="item-sprite-tileset" style="flex: 1;">
+                                    <option value="furniture">Furniture</option>
+                                    <option value="terrain">Terrain</option>
+                                    <option value="interior">Interior</option>
+                                </select>
+                                <input type="number" id="item-sprite-x" placeholder="X" min="0" max="20" style="width: 50px;">
+                                <input type="number" id="item-sprite-y" placeholder="Y" min="0" max="20" style="width: 50px;">
+                            </div>
+                            <button id="preview-item-sprite" style="width: 100%; margin-bottom: 0.5rem;">Preview Sprite</button>
+                            <canvas id="item-sprite-preview" width="32" height="32" style="border: 1px solid #444; background: #2a2a2a; display: block; margin: 0.25rem 0;"></canvas>
+                            <p style="font-size: 0.75rem; color: #888; margin-top: 0.25rem;">
+                                Select item type, optionally set custom sprite, then click on map to place
+                            </p>
+                        </div>
+                        <button id="spawn-entity">Spawn Entity (Center)</button>
+                        <button id="select-item-mode">Select Item for Placement</button>
+                        <button id="clear-item-selection" style="display: none;">Clear Item Selection</button>
+                        <button id="clear-entities">Clear All Entities</button>
+                        <p id="entity-count" style="margin-top: 0.5rem; color: #b0b0b0; font-size: 0.85rem;">Entities: 0</p>
+                    </div>
+                    <div class="tool-section">
+                        <h3>Time</h3>
+                        <div id="time-display" style="background: #2a2a2a; padding: 0.75rem; border-radius: 4px; text-align: center; margin-bottom: 0.5rem;">
+                            <div id="time-text" style="font-size: 1.2rem; font-weight: bold; color: #4a9eff;">6:00 AM</div>
+                            <div id="time-of-day" style="font-size: 0.85rem; color: #b0b0b0; margin-top: 0.25rem;">Morning</div>
+                            <div id="time-progress-bar" style="background: #555; height: 4px; border-radius: 2px; margin-top: 0.5rem; overflow: hidden;">
+                                <div id="time-progress-fill" style="background: #4a9eff; height: 100%; width: 25%; transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.25rem;">
+                            <button id="pause-time" style="flex: 1; padding: 0.5rem;">Pause</button>
+                            <button id="speed-time" style="flex: 1; padding: 0.5rem;">Speed: 1x</button>
+                        </div>
+                    </div>
+                    <div class="tool-section">
+                        <h3>Selected NPC</h3>
+                        <div id="selected-npc-info" style="background: #2a2a2a; padding: 0.75rem; border-radius: 4px; font-size: 0.85rem; min-height: 100px;">
+                            <p style="color: #888;">Click an NPC to view details</p>
+                        </div>
+                    </div>
+                    <div class="tool-section">
+                        <h3>All NPCs</h3>
+                        <div id="npc-stats-list" style="max-height: 200px; overflow-y: auto; background: #2a2a2a; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem;">
+                            <p style="color: #888;">No NPCs on map</p>
+                        </div>
+                    </div>
+                    <div class="tool-section">
+                        <h3>Selected Tile</h3>
+                        <canvas id="selected-tile-preview" width="32" height="32"></canvas>
+                        <p id="selected-tile-name">None</p>
+                    </div>
+                    <div class="tool-section">
+                        <h3>Active Layer (for placement)</h3>
+                        <label>
+                            <input type="radio" name="active-layer" value="ground" checked> Ground
+                        </label>
+                        <label>
+                            <input type="radio" name="active-layer" value="items"> Items
+                        </label>
+                        <label>
+                            <input type="radio" name="active-layer" value="characters"> Characters
+                        </label>
+                    </div>
+                    <div class="tool-section">
+                        <h3>Layer Visibility</h3>
+                        <label>
+                            <input type="checkbox" id="show-ground" checked> Ground Layer
+                        </label>
+                        <label>
+                            <input type="checkbox" id="show-items" checked> Items Layer
+                        </label>
+                        <label>
+                            <input type="checkbox" id="show-characters" checked> Characters Layer
+                        </label>
+                    </div>
+                </div>
+                <div class="client-main">
+                    <canvas id="map-canvas"></canvas>
+                    <div class="client-controls">
+                        <button id="zoom-in">Zoom In</button>
+                        <button id="zoom-out">Zoom Out</button>
+                        <span id="zoom-level">1.0x</span>
+                        <button id="reset-view">Reset View</button>
+                    </div>
+                    <div class="activity-console">
+                        <div class="console-header">
+                            <h3>Activity Log</h3>
+                            <button id="clear-console" title="Clear console">Clear</button>
+                        </div>
+                        <div id="console-content" class="console-content">
+                            <p class="console-message">Waiting for activity...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/tileset-manager.js"></script>
+    <script src="js/needs-system.js"></script>
+    <script src="js/time-system.js"></script>
+    <script src="js/activity-logger.js"></script>
+    <script src="js/entity.js"></script>
+    <script src="js/npc.js"></script>
+    <script src="js/item.js"></script>
+    <script src="js/functional-item.js"></script>
+    <script src="js/entity-manager.js"></script>
+    <script src="js/character.js"></script>
+    <script src="js/input-handler.js"></script>
+    <script src="js/tileset-editor.js"></script>
+    <script src="js/map-renderer.js"></script>
+    <script src="js/client.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
